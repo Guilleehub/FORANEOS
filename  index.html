@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Administrador de Gastos Foráneo</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #6ebbe0, #1e3c72);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: rgba(0, 0, 50, 0.6);
+      padding: 20px;
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    nav {
+      display: none;
+      background-color: rgba(0, 0, 50, 0.4);
+      padding: 10px;
+      text-align: center;
+    }
+    nav button {
+      margin: 5px;
+      background-color: #004080;
+    }
+    .container {
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+    label, select, input {
+      display: block;
+      width: 100%;
+      margin-bottom: 15px;
+      font-size: 16px;
+      padding: 8px;
+      border-radius: 5px;
+    }
+    select, input {
+      color: #000;
+    }
+    button {
+      padding: 10px;
+      font-size: 16px;
+      background-color: #005aab;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .warning {
+      background-color: #f44336;
+      padding: 10px;
+      border-radius: 5px;
+      display: none;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    .perfil, .gastos-resumen, .historial {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+    #gastosSection, #historialSection {
+      display: none;
+    }
+    #registerSection {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header>Administrador de Gastos Estudiante Foráneo</header>
+
+  <nav id="menu">
+    <button onclick="mostrarSeccion('gastosSection')">Presupuesto y Gastos</button>
+    <button onclick="mostrarSeccion('historialSection')">Historial de Gastos</button>
+  </nav>
+
+  <div class="container" id="loginSection">
+    <label for="loginUsuario">Número de usuario:</label>
+    <input type="text" id="loginUsuario" placeholder="Número de usuario" />
+
+    <label for="loginPassword">Contraseña:</label>
+    <input type="password" id="loginPassword" placeholder="Contraseña" />
+
+    <button onclick="iniciarSesion()">Continuar</button>
+    <p>¿Nuevo usuario? <a href="#" onclick="mostrarRegistro()">Regístrate aquí</a></p>
+  </div>
+
+  <div class="container" id="registerSection">
+    <label for="newUsuario">Nuevo número de usuario:</label>
+    <input type="text" id="newUsuario" placeholder="Crea tu usuario" />
+
+    <label for="newPassword">Nueva contraseña:</label>
+    <input type="password" id="newPassword" placeholder="Crea tu contraseña" />
+
+    <button onclick="registrarUsuario()">Registrar</button>
+    <p>¿Ya tienes cuenta? <a href="#" onclick="mostrarLogin()">Inicia sesión aquí</a></p>
+  </div>
+
+  <div class="container" id="gastosSection">
+    <h2>PRESUPUESTO MENSUAL</h2>
+    <label for="nombre">Nombre:</label>
+    <input type="text" id="nombre" placeholder="Tu nombre completo" />
+
+    <label for="dinero">¿Cuánto dinero tienes al mes?</label>
+    <input type="number" id="dinero" placeholder="Ej. 9000" />
+
+    <h2>LUGAR DE VIVIENDA</h2>
+    <label for="alcaldia">Selecciona tu alcaldía:</label>
+    <select id="alcaldia">
+      <option value="4099">Iztapalapa</option>
+      <option value="4528">Iztacalco</option>
+      <option value="4551">Venustiano Carranza</option>
+      <option value="4582">Gustavo A. Madero</option>
+      <option value="4738">Tláhuac</option>
+      <option value="5038">Xochimilco</option>
+      <option value="5045">Tlalpan</option>
+      <option value="5479">Azcapotzalco</option>
+      <option value="5528">Coyoacán</option>
+      <option value="6530">Álvaro Obregón</option>
+      <option value="7167">La Magdalena Contreras</option>
+      <option value="7257">Benito Juárez</option>
+      <option value="7641">Cuajimalpa</option>
+      <option value="7827">Cuauhtémoc</option>
+      <option value="8592">Miguel Hidalgo</option>
+    </select>
+
+    <h2>GASTOS DIARIOS</h2>
+    <label for="escolares">Gastos escolares diarios:</label>
+    <input type="number" id="escolares" placeholder="Ej. 150 por día" />
+
+    <label for="pasaje">¿Cuánto gastas en pasaje al día?</label>
+    <input type="number" id="pasajeDiario" placeholder="Ej. 35" />
+
+    <label for="extras">Otros gastos extras diarios:</label>
+    <input type="number" id="extras" placeholder="Ej. 50" />
+
+    <h2>GASTOS DE ALIMENTACIÓN</h2>
+    <p>Se recomienda destinar el 30% de tu presupuesto mensual a alimentos.</p>
+
+    <button onclick="calcularGastos()">Calcular Gastos Totales</button>
+
+    <div id="warning" class="warning"></div>
+    <div class="perfil" id="perfil"></div>
+    <div class="gastos-resumen" id="resumen"></div>
+  </div>
+
+  <div class="container" id="historialSection">
+    <h2>HISTORIAL DE GASTOS</h2>
+    <div class="historial" id="historialGastos">(Aquí se mostrarán los gastos por día)</div>
+  </div>
+
+  <script>
+    function mostrarSeccion(id) {
+      document.getElementById('gastosSection').style.display = 'none';
+      document.getElementById('historialSection').style.display = 'none';
+      document.getElementById(id).style.display = 'block';
+    }
+
+    function mostrarRegistro() {
+      document.getElementById('loginSection').style.display = 'none';
+      document.getElementById('registerSection').style.display = 'block';
+    }
+
+    function mostrarLogin() {
+      document.getElementById('registerSection').style.display = 'none';
+      document.getElementById('loginSection').style.display = 'block';
+    }
+
+    function registrarUsuario() {
+      const usuario = document.getElementById('newUsuario').value;
+      const password = document.getElementById('newPassword').value;
+      if (!usuario || !password) {
+        alert('Por favor completa todos los campos.');
+        return;
+      }
+      const userData = { usuario, password };
+      localStorage.setItem(`usuario_${usuario}`, JSON.stringify(userData));
+      alert('Usuario registrado correctamente. Ahora puedes iniciar sesión.');
+      mostrarLogin();
+    }
+
+    function iniciarSesion() {
+      const usuario = document.getElementById('loginUsuario').value;
+      const password = document.getElementById('loginPassword').value;
+      const stored = localStorage.getItem(`usuario_${usuario}`);
+      if (stored) {
+        const datos = JSON.parse(stored);
+        if (datos.password === password) {
+          document.getElementById('loginSection').style.display = 'none';
+          document.getElementById('registerSection').style.display = 'none';
+          document.getElementById('gastosSection').style.display = 'block';
+          document.getElementById('menu').style.display = 'block';
+        } else {
+          alert('Contraseña incorrecta.');
+        }
+      } else {
+        alert('Usuario no encontrado.');
+      }
+    }
+
+    function calcularGastos() {
+      const usuario = document.getElementById('loginUsuario').value;
+      const password = document.getElementById('loginPassword').value;
+      const nombre = document.getElementById('nombre').value;
+      const dinero = parseInt(document.getElementById('dinero').value || 0);
+      const renta = parseInt(document.getElementById('alcaldia').value);
+      const escolares = parseInt(document.getElementById('escolares').value || 0) * 30;
+      const pasaje = parseInt(document.getElementById('pasajeDiario').value || 0) * 30;
+      const extras = parseInt(document.getElementById('extras').value || 0) * 30;
+      const comida = Math.round(dinero * 0.3);
+      const total = comida + pasaje + escolares + extras + renta;
+
+      document.getElementById('perfil').innerHTML = `<strong>Perfil:</strong><br>Usuario: ${usuario}<br>Nombre: ${nombre}`;
+
+      document.getElementById('resumen').innerHTML = `
+        <h3>Resumen de Gastos</h3>
+        <ul>
+          <li>Renta estimada: $${renta}</li>
+          <li>Comida (30%): $${comida}</li>
+          <li>Pasaje: $${pasaje}</li>
+          <li>Escolares (mensual): $${escolares}</li>
+          <li>Extras: $${extras}</li>
+          <li><strong>Total de gastos: $${total}</strong></li>
+          <li><strong>Fondos disponibles: $${dinero - total}</strong></li>
+        </ul>
+      `;
+
+      const warningBox = document.getElementById('warning');
+      if (total > dinero) {
+        warningBox.style.display = 'block';
+        warningBox.innerText = '¡Fondos insuficientes! Has excedido tu presupuesto mensual disponible.';
+      } else {
+        warningBox.style.display = 'none';
+      }
+
+      const hoy = new Date().toLocaleDateString();
+      const registroDiario = { fecha: hoy, renta, comida, pasaje, escolares, extras, total };
+      const historial = JSON.parse(localStorage.getItem(`historial_${usuario}`) || '[]');
+      historial.push(registroDiario);
+      localStorage.setItem(`historial_${usuario}`, JSON.stringify(historial));
+
+      const datos = { usuario, password, nombre, renta, comida, pasaje, escolares, extras, total, disponible: dinero - total };
+      localStorage.setItem('gastosEstudiante', JSON.stringify(datos));
+
+      mostrarHistorial(usuario);
+    }
+
+    function mostrarHistorial(usuario) {
+      const historial = JSON.parse(localStorage.getItem(`historial_${usuario}`) || '[]');
+      const div = document.getElementById('historialGastos');
+      div.innerHTML = '<ul>' + historial.map(h => `<li>${h.fecha}: Total $${h.total}</li>`).join('') + '</ul>';
+    }
+  </script>
+</body>
+</html>
